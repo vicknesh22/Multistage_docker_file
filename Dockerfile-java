@@ -1,0 +1,27 @@
+FROM picoded/ubuntu-openjdk-8-jdk AS builder
+LABEL maintainer="vicknesh22@gmail.com"
+# RUN using non root user
+# RUN useradd -u 8877 dock
+
+#install maven
+#RUN apt-get install openjdk-8-jdk openjdk-8-jre
+#ENV JAVA_HOME  /usr/lib/jvm/java-8-openjdk-amd64
+
+RUN apt-get update -y && apt-get install -y maven
+#add maven dependencies
+ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
+ENV MAVEN_HOME /usr/share/maven
+
+#add_a_Private_git
+
+RUN apt-get install -y git && mkdir /opt/samplecode && cd /opt/samplecode && git clone https://12bcbcb22c029748ccc082c8da3c44dc94a7a22c@github.com/BavithraMurugan/demorepo
+#RUN cd /opt/sample/BavithraMurugan/demorepo/
+WORKDIR /opt/samplecode
+RUN cd demorepo &&  mvn clean install -f /opt/samplecode/demorepo/pom.xml &&  ls -lrt /opt/samplecode/demorepo/target/
+
+
+FROM tomcat:jdk8
+ENV CATALINA_HOME /usr/local/tomcat/
+COPY --from=builder /opt/samplecode/demorepo/target/jpetstore.war /CATALINA_HOME/webapps/
+CMD ["catalina.sh" "run"]
+EXPOSE 8080

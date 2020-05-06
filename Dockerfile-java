@@ -12,16 +12,13 @@ RUN apt-get update -y && apt-get install -y maven
 ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 ENV MAVEN_HOME /usr/share/maven
 
-#add_a_Private_git
-
-RUN apt-get install -y git && mkdir /opt/samplecode && cd /opt/samplecode && git clone https://12bcbcb22c029748ccc082c8da3c44dc94a7a22c@github.com/BavithraMurugan/demorepo
-#RUN cd /opt/sample/BavithraMurugan/demorepo/
+RUN apt-get install -y git && mkdir /opt/samplecode && cd /opt/samplecode && git clone https://github.com/spring-projects/spring-petclinic.git
 WORKDIR /opt/samplecode
-RUN cd demorepo &&  mvn clean install -f /opt/samplecode/demorepo/pom.xml &&  ls -lrt /opt/samplecode/demorepo/target/
+RUN cd spring-petclinic &&  mvn clean install -f /opt/samplecode/spring-petclinic/pom.xml &&  ls -lrt /opt/samplecode/spring-petclinic/target/
 
 
 FROM tomcat:jdk8
 ENV CATALINA_HOME /usr/local/tomcat/
-COPY --from=builder /opt/samplecode/demorepo/target/jpetstore.war /CATALINA_HOME/webapps/
+COPY --from=builder /opt/samplecode/*.jar /CATALINA_HOME/webapps/
 CMD ["catalina.sh" "run"]
 EXPOSE 8080
